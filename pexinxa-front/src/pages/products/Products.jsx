@@ -9,6 +9,7 @@ import BannerCarousel from "../../components/Carousel/BannerCarousel";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import products from "../../hooks/useProductData";
+import MarketMap from "../../components/MarketMap/MarketMap";
 
 export const Product = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -19,8 +20,8 @@ export const Product = () => {
     markets: [],
     priceRange: [2, 100],
   });
-  const [economyMode, setEconomyMode] = useState(false); // Switch para Economia Máxima
-  const [setShowLoginModal] = useState(false); // State for login modal
+  const [economyMode, setEconomyMode] = useState(false); 
+  const [setShowLoginModal] = useState(false); 
 
   const { currentUser } = useAuth();
   const { addItem } = useCart();
@@ -104,7 +105,8 @@ export const Product = () => {
                     onChange={() => setEconomyMode(!economyMode)}
                   />
                 }
-                label="Economia Máxima"
+                className="text-green-600 font-montserrat"
+                label="✅ Economia Máxima "
               />
             </FormGroup>
             <button
@@ -152,7 +154,7 @@ export const Product = () => {
                 {economyMode &&
                   (product.price === 9.5 || product.price === 5.9) && (
                     <span className="text-xs text-green-500 font-bold">
-                      ✅ Economia Máxima
+                      ✅ Economia Máxima!
                     </span>
                   )}
                 <button
@@ -169,8 +171,6 @@ export const Product = () => {
             </p>
           )}
         </div>
-
-        {/* Modal de Filtros */}
         {isFilterOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
             <div className="bg-white w-96 p-5 h-full overflow-y-auto shadow-lg rounded-l-xl border border-gray-300">
@@ -208,7 +208,7 @@ export const Product = () => {
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-700 mb-2">Mercados</h3>
                 <div>
-                  {["Barraca Supermercado", "Amarelão Supermercado"].map(
+                  {["Barraca Supermercado", "Amarelão Supermercado", "Sonia Supermercado", "Assalá Atacadista"].map(
                     (market) => (
                       <div key={market} className="flex items-center mb-2">
                         <input
@@ -240,6 +240,23 @@ export const Product = () => {
         )}
       </main>
       <Footer />
+      <section className="w-full bg-sky-50 py-12 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 font-montserrat">
+              Não sabe qual mercado ir?
+            </h2>
+            <p className="text-xl text-gray-600 mt-2 font-montserrat">
+              Veja o mais próximo de você!
+            </p>
+          </div>
+          <div className="rounded-lg overflow-hidden shadow-lg border border-gray-200">
+            <div className="h-[500px] w-full">
+              <MarketMap />
+            </div>
+          </div>
+        </div>
+      </section>
       {showScrollToTop && (
         <button
           onClick={scrollToTop}
@@ -248,6 +265,7 @@ export const Product = () => {
           <ArrowUp />
         </button>
       )}
+      
     </div>
   );
 };
