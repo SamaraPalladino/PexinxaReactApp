@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import products from "../../hooks/useProductData";
 import MarketMap from "../../components/MarketMap/MarketMap";
+import { useNavigate } from "react-router-dom";
 
 export const Product = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -20,11 +21,12 @@ export const Product = () => {
     markets: [],
     priceRange: [2, 100],
   });
-  const [economyMode, setEconomyMode] = useState(false); 
-  const [setShowLoginModal] = useState(false); 
+  const [economyMode, setEconomyMode] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const { currentUser } = useAuth();
   const { addItem } = useCart();
+  const navigate = useNavigate();
 
   const handleAddToCart = (product) => {
     if (!currentUser) {
@@ -68,7 +70,8 @@ export const Product = () => {
     }
 
     filtered = filtered.filter(
-      (product) => product.price >= priceRange[0] && product.price <= priceRange[1]
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
     if (economyMode) {
@@ -105,7 +108,7 @@ export const Product = () => {
                     onChange={() => setEconomyMode(!economyMode)}
                   />
                 }
-                className="text-green-600 font-montserrat"
+                className="text-green-600 font-montserrat font-semibold"
                 label="✅ Economia Máxima "
               />
             </FormGroup>
@@ -208,25 +211,28 @@ export const Product = () => {
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-700 mb-2">Mercados</h3>
                 <div>
-                  {["Barraca Supermercado", "Amarelão Supermercado", "Sonia Supermercado", "Assalá Atacadista"].map(
-                    (market) => (
-                      <div key={market} className="flex items-center mb-2">
-                        <input
-                          type="checkbox"
-                          id={market}
-                          checked={filters.markets.includes(market)}
-                          onChange={() => handleFilterChange("markets", market)}
-                          className="mr-2 cursor-pointer accent-orange-500"
-                        />
-                        <label
-                          htmlFor={market}
-                          className="text-sm text-gray-700 cursor-pointer"
-                        >
-                          {market}
-                        </label>
-                      </div>
-                    )
-                  )}
+                  {[
+                    "Barraca Supermercado",
+                    "Amarelão Supermercado",
+                    "Sonia Supermercado",
+                    "Assalá Atacadista",
+                  ].map((market) => (
+                    <div key={market} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={market}
+                        checked={filters.markets.includes(market)}
+                        onChange={() => handleFilterChange("markets", market)}
+                        className="mr-2 cursor-pointer accent-orange-500"
+                      />
+                      <label
+                        htmlFor={market}
+                        className="text-sm text-gray-700 cursor-pointer"
+                      >
+                        {market}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
               <button
@@ -257,6 +263,38 @@ export const Product = () => {
           </div>
         </div>
       </section>
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className=" flex text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <X className="w-6 h-6 text-orange-500" />
+            </button>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Faça Login ou Cadastre-se!
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Você precisa estar logado para adicionar produtos a sua lista!
+            </p>
+            <div className="flex justify-around">
+              <button
+                onClick={() => navigate("/login")}
+                className="bg-orange-500 text-white py-2 px-14 rounded-full font-bold hover:bg-orange-600 transition-all"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="bg-gray-300 text-gray-700 py-2 px-12 rounded-full font-bold hover:bg-gray-400 transition-all"
+              >
+                Cadastro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showScrollToTop && (
         <button
           onClick={scrollToTop}
@@ -265,7 +303,6 @@ export const Product = () => {
           <ArrowUp />
         </button>
       )}
-      
     </div>
   );
 };
