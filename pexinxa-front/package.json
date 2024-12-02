@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@headlessui/react": "^2.2.0",
+    "@mui/material": "^6.1.9",
     "@radix-ui/react-dialog": "^1.1.2",
     "@react-google-maps/api": "^2.20.3",
     "@tailwindcss/typography": "^0.5.15",
