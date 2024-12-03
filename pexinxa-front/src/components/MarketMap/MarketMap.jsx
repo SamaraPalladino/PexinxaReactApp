@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
 
 const containerStyle = {
   width: "100%",
@@ -7,12 +7,14 @@ const containerStyle = {
 };
 
 const center = {
-  lat:  -21.6034, 
-  lng:  -48.3665,
+  lat: -21.6034,
+  lng: -48.3665,
 };
 
 const MarketMap = () => {
   const [markets, setMarkets] = useState([]);
+  const [selectedMarket, setSelectedMarket] = useState(null); 
+  const [promotions, setPromotions] = useState({}); 
 
   useEffect(() => {
     const fetchNearbyMarkets = () => {
@@ -22,13 +24,19 @@ const MarketMap = () => {
 
       const request = {
         location: new window.google.maps.LatLng(center.lat, center.lng),
-        radius: "2000", 
-        type: ["supermarket"], 
+        radius: "2000",
+        type: ["supermarket"],
       };
 
       service.nearbySearch(request, (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
           setMarkets(results);
+          // Simulando promoções para cada mercado
+          const promoData = results.reduce((acc, market) => {
+            acc[market.place_id] = `Promoção de 10% em ${market.name}!`; 
+            return acc;
+          }, {});
+          setPromotions(promoData);
         }
       });
     };
@@ -38,8 +46,12 @@ const MarketMap = () => {
     }
   }, []);
 
+  const handleMarkerClick = (market) => {
+    setSelectedMarket(market);
+  };
+
   return (
-    <LoadScript googleMapsApiKey="AIzaSyBQCEDUi3ebV0Lko3_Oza411F5VpLEBKp4" libraries={["places"]}>
+    <LoadScript googleMapsApiKey="YOUR_GOOGLE_API_KEY" libraries={["places"]}>
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
         {markets.map((market) => (
           <Marker
@@ -49,8 +61,24 @@ const MarketMap = () => {
               lng: market.geometry.location.lng(),
             }}
             title={market.name}
+            onClick={() => handleMarkerClick(market)}
           />
         ))}
+
+        {selectedMarket && (
+          <InfoWindow
+            position={{
+              lat: selectedMarket.geometry.location.lat(),
+              lng: selectedMarket.geometry.location.lng(),
+            }}
+            onCloseClick={() => setSelectedMarket(null)}
+          >
+            <div>
+              <h3>{selectedMarket.name}</h3>
+              <p>{promotions[selectedMarket.place_id]}</p>
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
     </LoadScript>
   );

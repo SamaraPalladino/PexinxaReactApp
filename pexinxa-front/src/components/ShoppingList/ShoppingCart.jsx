@@ -1,12 +1,14 @@
 import { useCart } from "../../context/CartContext";
+import useCalendarIntegrations from "../../hooks/useCalendarIntegration";
 import PropTypes from "prop-types";
 import jsPDF from "jspdf";
-import "jspdf-autotable"; 
+import "jspdf-autotable";
 
 const EmptyCartImage = "/Sacolinha.png";
 
 export const ShoppingCart = ({ isOpen, onClose }) => {
   const { items, addItem, removeItem, subtotal } = useCart();
+  const { addEvent, login, isAuthenticated } = useCalendarIntegrations();
   const comparison = 20.0;
 
   const generatePDF = () => {
@@ -29,7 +31,7 @@ export const ShoppingCart = ({ isOpen, onClose }) => {
     doc.text(`Comparação: +R$ ${comparison.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 20);
     doc.text(`Total: R$ ${(subtotal + comparison).toFixed(2)}`, 10, doc.lastAutoTable.finalY + 30);
 
-    return doc.output("blob"); // Retorna o arquivo PDF como Blob
+    return doc.output("blob"); 
   };
 
   const exportToPDF = () => {
@@ -47,11 +49,10 @@ export const ShoppingCart = ({ isOpen, onClose }) => {
 
     const fileReader = new FileReader();
     fileReader.onload = () => {
-      const base64PDF = fileReader.result.split(",")[1]; // Extrai o Base64
+      const base64PDF = fileReader.result.split(",")[1]; 
       const pdfLink = `data:application/pdf;base64,${base64PDF}`;
 
       if (navigator.share) {
-        // Usar Web Share API em dispositivos compatíveis
         navigator
           .share({
             title: "Lista de Compras",
@@ -60,7 +61,6 @@ export const ShoppingCart = ({ isOpen, onClose }) => {
           })
           .catch((err) => console.error("Erro ao compartilhar:", err));
       } else {
-        // Fallback: Gera link para download e orienta usuário
         window.open(
           `https://wa.me/?text=${encodeURIComponent(
             "Confira minha lista de compras do Amarelão Supermercados! Clique no link para baixar o PDF: " +
@@ -70,6 +70,36 @@ export const ShoppingCart = ({ isOpen, onClose }) => {
       }
     };
     fileReader.readAsDataURL(blob);
+  };
+
+  const addToCalendar = async () => {
+    if (!isAuthenticated) {
+      await login();
+    }
+
+    const eventDetails = {
+      summary: "Lista de Compras do Amarelão",
+      description: `Subtotal: R$ ${subtotal.toFixed(2)}, Comparação: R$ ${comparison.toFixed(
+        2
+      )}, Total: R$ ${(subtotal + comparison).toFixed(2)}`,
+      start: {
+        dateTime: new Date().toISOString(), // Define o início para o momento atual
+        timeZone: "America/Sao_Paulo",
+      },
+      end: {
+        dateTime: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString(), // Define o fim para 1h depois
+        timeZone: "America/Sao_Paulo",
+      },
+    };
+
+    try {
+      const response = await addEvent(eventDetails);
+      console.log("Evento adicionado ao calendário:", response);
+      alert("Evento adicionado ao calendário com sucesso!");
+    } catch (error) {
+      console.error("Erro ao adicionar ao calendário:", error);
+      alert("Erro ao adicionar ao calendário.");
+    }
   };
 
   return (
@@ -174,6 +204,12 @@ export const ShoppingCart = ({ isOpen, onClose }) => {
                 >
                   Compartilhar no WhatsApp
                 </button>
+                <button
+                  onClick={addToCalendar}
+                  className="w-full bg-orange-500 text-white py-3 mt-4 rounded-lg hover:bg-orange-600 transition text-sm font-bold"
+                >
+                  Adicionar ao Calendário
+                </button>
               </div>
             </div>
           )}
@@ -187,4 +223,5 @@ ShoppingCart.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };
+
 export default ShoppingCart;
